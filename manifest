@@ -1,0 +1,16 @@
+appname=caddy
+version=2.11.9-3
+display_name=${common.display_name}
+desc="${common.desc}"
+platform=all
+source=thirdparty
+maintainer=Caddy Authors
+maintainer_url=https://github.com/caddyserver/caddy
+distributor=local-fpk
+distributor_url=https://github.com/caddyserver/caddy
+desktop_uidir=ui
+desktop_applaunchname=caddy.web
+service_port=18081
+checkport=false
+changelog=Adds website passwords and IP allowlists, backup download, Caddy upgrade actions, and persistent panel credentials.
+checksum=dcd2085ed71d07335616941747cd2381

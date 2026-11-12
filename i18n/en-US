@@ -1,0 +1,26 @@
+[common]
+display_name="Caddy"
+desc="Caddy web server with a management panel for sites, automatic HTTPS, Caddyfile editing, certificates, and logs. This is not an official fnOS package from the Caddy project."
+
+[install]
+stepTitle="Web service ports"
+helpText="Default website ports are 8080/8443 and the panel port is 18081. The password is only used on first installation; upgrades retain it. Public HTTPS requires ports 80/443, router forwarding, and correct DNS. Do not expose the panel directly to the Internet."
+httpPort="HTTP port"
+httpsPort="HTTPS port"
+panelPort="Management panel port"
+adminPassword="Panel administrator password"
+portRequired="Enter a port number"
+portInvalid="Enter a port from 1 to 65535"
+passwordRequired="Set a panel administrator password"
+passwordInvalid="Use a password from 10 to 128 characters"
+
+[uninstall]
+stepTitle="Confirm uninstallation"
+helpText="Choose how to handle the Caddy configuration, certificates, and website files. Deleted data cannot be recovered."
+label="Application data"
+keep="Keep configuration, certificates, and website files"
+delete="Delete all application data"
+required="Choose how to handle application data"
+
+[entry]
+title="Caddy Console"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "${wizard_data_action:-keep}" = "delete" ]; then
+    DATA_ROOT=$(realpath -m -- "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk")
+    case "$DATA_ROOT" in
+    */@appshare/caddy-fpk)
+        rm -rf -- "$DATA_ROOT"
+        ;;
+    *)
+        echo "Refusing to remove unexpected data path: ${DATA_ROOT}" >&2
+        exit 1
+        ;;
+    esac
+fi
+
+exit 0

@@ -1,0 +1,13 @@
+{
+  "name": "caddy-fpk-panel",
+  "version": "2.11.9-3",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "start": "node server.js"
+  }
+}

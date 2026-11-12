@@ -1,0 +1,20 @@
+{
+	admin 0.0.0.0:2019 {
+		origins caddy:2019
+	}
+	http_port {$CADDY_HTTP_PORT:8080}
+	https_port {$CADDY_HTTPS_PORT:8443}
+}
+
+# Replace this example with your own domain or reverse-proxy configuration.
+# The container listens on 8080 and 8443; host ports are selected during install.
+:8080 {
+	root * /srv
+	file_server
+	encode gzip
+}
+
+# Reverse proxy example (replace the example block above):
+# example.com {
+# 	reverse_proxy host.docker.internal:3000
+# }

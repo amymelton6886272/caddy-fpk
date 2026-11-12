@@ -1,0 +1,75 @@
+[
+    {
+        "stepTitle": "${install.stepTitle}",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "${install.helpText}"
+            },
+            {
+                "type": "text",
+                "field": "wizard_http_port",
+                "label": "${install.httpPort}",
+                "initValue": "8080",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "${install.portRequired}"
+                    },
+                    {
+                        "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+                        "message": "${install.portInvalid}"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "wizard_https_port",
+                "label": "${install.httpsPort}",
+                "initValue": "8443",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "${install.portRequired}"
+                    },
+                    {
+                        "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+                        "message": "${install.portInvalid}"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "wizard_panel_port",
+                "label": "${install.panelPort}",
+                "initValue": "18081",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "${install.portRequired}"
+                    },
+                    {
+                        "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+                        "message": "${install.portInvalid}"
+                    }
+                ]
+            },
+            {
+                "type": "password",
+                "field": "wizard_admin_password",
+                "label": "${install.adminPassword}",
+                "initValue": "",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "${install.passwordRequired}"
+                    },
+                    {
+                        "pattern": "^.{10,128}$",
+                        "message": "${install.passwordInvalid}"
+                    }
+                ]
+            }
+        ]
+    }
+]

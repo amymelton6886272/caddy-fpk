@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -eu
+
+DATA_ROOT="/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk"
+CONFIG_FILE="${DATA_ROOT}/config/Caddyfile"
+PANEL_DIR="${DATA_ROOT}/panel"
+
+fail() {
+    echo "Caddy FPK: $1" >&2
+    if [ -n "${TRIM_TEMP_LOGFILE:-}" ]; then
+        echo "$1" >"${TRIM_TEMP_LOGFILE}"
+    fi
+    exit 1
+}
+
+for PORT in "${wizard_http_port:-8080}" "${wizard_https_port:-8443}" "${wizard_panel_port:-18081}"; do
+    case "$PORT" in ''|*[!0-9]*) fail "端口必须是 1-65535 之间的数字" ;; esac
+    [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ] || fail "端口必须在 1-65535 之间"
+done
+[ "${wizard_http_port:-8080}" != "${wizard_https_port:-8443}" ] || fail "HTTP 和 HTTPS 端口不能相同"
+[ "${wizard_panel_port:-18081}" != "${wizard_http_port:-8080}" ] && [ "${wizard_panel_port:-18081}" != "${wizard_https_port:-8443}" ] || fail "后台端口不能与网站端口相同"
+
+PASSWORD="${wizard_admin_password:-}"
+IMAGE_NAME="caddy-fpk-local:2.11.9-3"
+[ -f "${PANEL_DIR}/password.hash" ] || {
+    [ "${#PASSWORD}" -ge 10 ] && [ "${#PASSWORD}" -le 128 ] || fail "后台管理员密码长度须为 10-128 个字符"
+}
+
+umask 077
+mkdir -p "${DATA_ROOT}/www" "${DATA_ROOT}/data" "${DATA_ROOT}/config" "${DATA_ROOT}/logs" "$PANEL_DIR"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    cp "${TRIM_APPDEST}/defaults/Caddyfile" "$CONFIG_FILE"
+fi
+if [ ! -f "${DATA_ROOT}/www/index.html" ]; then
+    cp "${TRIM_APPDEST}/defaults/www/index.html" "${DATA_ROOT}/www/index.html"
+fi
+
+if [ ! -f "${PANEL_DIR}/password.hash" ]; then
+    INIT_OUTPUT="$(mktemp)" || fail "无法创建临时凭据文件"
+    trap 'rm -f "$INIT_OUTPUT"' EXIT
+    docker run --rm -v "${DATA_ROOT}:/mnt/caddy" --entrypoint node "$IMAGE_NAME" /usr/local/bin/caddy-fpk-init init --data-root /mnt/caddy --password "$PASSWORD" >"$INIT_OUTPUT" 2>&1 || {
+        cat "$INIT_OUTPUT" >&2
+        fail "无法初始化后台凭据。请检查网络、镜像仓库访问权限和管理员密码。"
+    }
+    rm -f "$INIT_OUTPUT"
+    trap - EXIT
+fi
+
+if [ ! -f "${DATA_ROOT}/sites.json" ]; then
+    cp "${TRIM_APPDEST}/defaults/sites.json" "${DATA_ROOT}/sites.json"
+fi
+if ! grep -q 'admin 0.0.0.0:2019' "$CONFIG_FILE"; then
+    if [ -f "${DATA_ROOT}/config/Caddyfile" ] && [ "$(head -c 1 "$CONFIG_FILE")" = "{" ]; then
+        sed -i '1a\\tadmin 0.0.0.0:2019 {\n\t\torigins caddy:2019\n\t}' "$CONFIG_FILE"
+    else
+        cp "$CONFIG_FILE" "${DATA_ROOT}/config/Caddyfile.pre-panel" 2>/dev/null || true
+        cp "${TRIM_APPDEST}/defaults/Caddyfile" "$CONFIG_FILE"
+        printf '\n# Existing configuration is preserved in Caddyfile.pre-panel.\n' >> "$CONFIG_FILE"
+    fi
+fi
+
+chmod 700 "${DATA_ROOT}/panel" 2>/dev/null || true
+touch "${DATA_ROOT}/logs/caddy.log"
+
+exit 0

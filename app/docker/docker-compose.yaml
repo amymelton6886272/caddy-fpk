@@ -1,0 +1,32 @@
+services:
+  caddy:
+    image: caddy-fpk-local:2.11.9-3
+    container_name: caddy-fpk
+    restart: unless-stopped
+    command: ["sh", "-c", "exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile 2>&1 | tee -a /mnt/caddy/logs/caddy.log"]
+    ports:
+      - "${wizard_http_port}:8080"
+      - "${wizard_https_port}:8443"
+    environment:
+      - CADDY_HTTP_PORT=${wizard_http_port}
+      - CADDY_HTTPS_PORT=${wizard_https_port}
+    volumes:
+      - "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk/config/Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk/www:/srv:ro"
+      - "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk/data:/data"
+      - "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk/config:/config"
+      - "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk/logs:/mnt/caddy/logs"
+
+  panel:
+    image: caddy-fpk-local:2.11.9-3
+    container_name: caddy-fpk-panel
+    restart: unless-stopped
+    command: ["caddy-fpk-panel"]
+    environment:
+      - PANEL_PORT=8080
+    ports:
+      - "${wizard_panel_port}:8080"
+    volumes:
+      - "/${TRIM_APPDEST_VOL}/@appshare/caddy-fpk:/mnt/caddy"
+    depends_on:
+      - caddy

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+COMPOSE_FILE="${TRIM_APPDEST}/docker/docker-compose.yaml"
+
+is_docker_running() {
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        return 1
+    fi
+    docker inspect caddy-fpk --format '{{.State.Running}}' 2>/dev/null | grep -qx true || return 1
+    docker inspect caddy-fpk-panel --format '{{.State.Running}}' 2>/dev/null | grep -qx true
+}
+
+case "$1" in
+start|stop)
+    exit 0
+    ;;
+status)
+    if is_docker_running; then
+        exit 0
+    fi
+    exit 3
+    ;;
+*)
+    exit 1
+    ;;
+esac

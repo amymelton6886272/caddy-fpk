@@ -1,0 +1,24 @@
+# 构建产物：由 build.ps1 生成，不进版本库。
+app.tgz
+*.fpk
+dist/
+.build/
+.build-logo.svg
+
+node_modules/
+*.log
+
+.env
+.env.local
+.env.production
+
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+*.bak
+*.tmp

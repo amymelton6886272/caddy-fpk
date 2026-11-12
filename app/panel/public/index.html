@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102f2c">
+  <title>Caddy 管理后台</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="login" class="login-page">
+    <form id="login-form" class="login-card">
+      <div class="brand"><img src="/logo.svg" alt="Caddy"><span>FNOS CONSOLE</span></div>
+      <p class="eyebrow">服务器管理中心</p>
+      <h1>欢迎回来</h1>
+      <p class="muted">管理站点、证书与服务配置。</p>
+      <label for="login-password">管理员密码</label>
+      <input id="login-password" type="password" autocomplete="current-password" required autofocus>
+      <button class="primary full" type="submit">登录管理后台</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand"><img src="/logo.svg" alt="Caddy"><span>管理后台</span></div>
+      <nav id="nav" aria-label="后台导航">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span>总览</button>
+        <button class="nav-item" data-view="sites"><span class="nav-icon">⇄</span>站点管理</button>
+        <button class="nav-item" data-view="config"><span class="nav-icon">{ }</span>Caddyfile</button>
+        <button class="nav-item" data-view="certificates"><span class="nav-icon">◇</span>证书</button>
+        <button class="nav-item" data-view="logs"><span class="nav-icon">≡</span>日志</button>
+        <button class="nav-item" data-view="backups"><span class="nav-icon">↺</span>配置历史</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button id="password-button" class="nav-item"><span class="nav-icon">⚿</span>修改密码</button>
+        <button id="logout-button" class="nav-item"><span class="nav-icon">↪</span>退出登录</button>
+        <p class="version">Caddy 2.11.9 · FPK 3</p>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><p class="eyebrow" id="view-kicker">CADDY SERVER</p><h1 id="view-title">总览</h1></div>
+        <div class="top-actions"><span id="service-pill" class="pill neutral">正在连接</span><a id="website-link" class="button ghost" href="#" target="_blank" rel="noopener">打开网站 ↗</a></div>
+      </header>
+      <div id="notice" class="notice hidden" role="status"></div>
+
+      <section id="overview" class="view">
+        <div class="stats">
+          <article class="stat-card accent"><span>服务状态</span><strong id="stat-status">—</strong><small>热加载，无需重启容器</small></article>
+          <article class="stat-card"><span>托管站点</span><strong id="stat-sites">—</strong><small>反向代理与静态网站</small></article>
+          <article class="stat-card"><span>配置模式</span><strong id="stat-mode">—</strong><small>手动配置不会被向导覆盖</small></article>
+          <article class="stat-card"><span>配置历史</span><strong id="stat-backups">—</strong><small>自动保留最近 10 份</small></article>
+        </div>
+        <div class="grid two">
+          <article class="card"><div class="section-title"><div><p class="eyebrow">QUICK START</p><h2>让网站上线</h2></div><span class="big-icon">↗</span></div><ol class="steps"><li>添加反向代理站点，填写域名和目标地址。</li><li>将 DNS 指向飞牛，并转发路由器的 80/443 端口。</li><li>保存并应用，Caddy 会自动申请和续期证书。</li></ol><button class="primary" data-go="sites">管理站点</button></article>
+          <article class="card"><div class="section-title"><h2>使用须知</h2><span class="big-icon">i</span></div><p class="muted">此后台是 FPK 配套工具，不是 Caddy 官方界面。站点表单仅管理通过它创建的配置。</p><p class="muted">在文件管理器中手动修改过 Caddyfile 后，请使用高级编辑器。保存前会由 Caddy 校验；失败不会替换当前配置。</p><a class="text-link" href="https://caddyserver.com/docs/caddyfile" target="_blank" rel="noopener">Caddyfile 官方文档 ↗</a></article>
+        </div>
+        <article class="card"><div class="section-title"><h2>最近站点</h2><button class="text-button" data-go="sites">查看全部 →</button></div><div id="overview-sites" class="compact-list"></div></article>
+      </section>
+
+      <section id="sites" class="view hidden">
+        <div class="toolbar"><div><h2>网站与反向代理</h2><p class="muted">保存后立即校验并热加载完整配置。</p></div><button id="add-site" class="primary">＋ 添加站点</button></div>
+        <div id="manual-warning" class="notice warning hidden">当前是手动配置模式。为保护已有内容，站点表单已停用；可在 Caddyfile 页面查看和编辑。</div>
+        <div id="site-list" class="site-list"></div>
+        <div class="savebar"><span id="site-count" class="muted"></span><button id="save-sites" class="primary">保存并应用</button></div>
+      </section>
+
+      <section id="config" class="view hidden">
+        <div class="toolbar"><div><h2>高级配置编辑器</h2><p class="muted">支持 Caddy 的完整功能。请保留管理 API 的全局配置。</p></div><div class="button-group"><a class="button ghost" href="/api/export">导出</a><button id="validate-config" class="button ghost">仅校验</button><button id="save-config" class="primary">保存并应用</button></div></div>
+        <div class="notice warning">管理后台依赖 <code>admin 0.0.0.0:2019</code> 与 <code>origins caddy:2019</code>。该端口仅对内部容器网络开放，不对公网开放。</div>
+        <textarea id="config-editor" class="code-editor" spellcheck="false" aria-label="Caddyfile 编辑器"></textarea>
+        <pre id="validation-output" class="validation hidden"></pre>
+      </section>
+
+      <section id="certificates" class="view hidden">
+        <div class="toolbar"><div><h2>证书</h2><p class="muted">展示 Caddy 已存储的证书，不包含私钥。</p></div><button class="button ghost refresh" data-refresh="certificates">刷新</button></div>
+        <div id="certificate-list" class="card table-wrap"></div>
+      </section>
+
+      <section id="logs" class="view hidden">
+        <div class="toolbar"><div><h2>运行日志</h2><p class="muted">最近 300 行，用于排查配置和证书问题。</p></div><button class="button ghost refresh" data-refresh="logs">刷新</button></div>
+        <pre id="log-view" class="log-view">正在加载…</pre>
+      </section>
+
+      <section id="backups" class="view hidden">
+        <div class="toolbar"><div><h2>配置历史</h2><p class="muted">成功应用新配置前自动备份，最多保留 10 份。</p></div><button class="button ghost refresh" data-refresh="backups">刷新</button></div>
+        <div id="backup-list" class="card table-wrap"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="site-dialog">
+    <form id="site-form">
+      <div class="section-title"><h2 id="site-dialog-title">添加站点</h2><button type="button" class="icon-button close-dialog" aria-label="关闭">×</button></div>
+      <input id="site-id" type="hidden">
+      <div class="form-grid">
+        <label>显示名称<input id="site-name" required maxlength="100" placeholder="我的网站"></label>
+        <label>站点类型<select id="site-type"><option value="proxy">反向代理</option><option value="static">静态网站</option></select></label>
+      </div>
+      <label>域名或监听地址<input id="site-address" required placeholder="example.com 或 :8080"><small>域名会自动启用 HTTPS；IP 地址将使用 Caddy 内部 CA。</small></label>
+      <label id="upstream-field">上游地址<input id="site-upstream" placeholder="192.168.1.10:3000"><small>填写主机名或 IP:端口，不带 http:// 和路径。</small></label>
+      <label id="root-field" class="hidden">容器内静态目录<input id="site-root" placeholder="/srv"><small>默认 /srv 对应应用共享目录的 www。</small></label>
+      <details id="security-settings" class="security-settings">
+        <summary>安全策略<span id="security-summary" class="tag">未启用</span></summary>
+        <div class="security-body">
+          <div class="form-grid">
+            <label>访问用户名<input id="site-auth-user" maxlength="64" autocomplete="off" placeholder="留空则不启用密码"><small>启用后，访客需通过浏览器账号密码验证。</small></label>
+            <label>访问密码<input id="site-auth-password" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="8-72 个字符"><small id="site-password-help">以 bcrypt 哈希保存，不保存明文。</small></label>
+          </div>
+          <label>IP / CIDR 白名单<input id="site-allowed-ips" placeholder="192.168.1.0/24, 10.0.0.8, ::1"><small>留空允许所有 IP。多个地址用逗号或换行分隔；不在名单内的访客收到 403。</small></label>
+          <p class="form-note">白名单依据 Caddy 实际看到的连接来源。若站点外层还有 CDN 或反向代理，请先正确配置可信代理，否则可能只能看到上层代理 IP。密码与白名单同时启用时，两项检查都必须通过。网站密码与后台管理员密码互相独立。</p>
+        </div>
+      </details>
+      <p class="form-note">多个站点不能使用相同监听地址。如需复杂路由、请求头或负载均衡，请在高级编辑器中配置。</p>
+      <div class="dialog-actions"><button type="button" class="button ghost close-dialog">取消</button><button type="submit" class="primary">保存到列表</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="password-dialog">
+    <form id="password-form">
+      <div class="section-title"><h2>修改管理员密码</h2><button type="button" class="icon-button close-dialog" aria-label="关闭">×</button></div>
+      <label>当前密码<input id="current-password" type="password" autocomplete="current-password" required></label>
+      <label>新密码<input id="new-password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required><small>10-128 个字符，请使用高强度密码。</small></label>
+      <div class="dialog-actions"><button type="button" class="button ghost close-dialog">取消</button><button type="submit" class="primary">确认修改</button></div>
+    </form>
+  </dialog>
+  <script src="/app.js"></script>
+</body>
+</html>

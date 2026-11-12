@@ -1,0 +1,22 @@
+{
+    "docker-project": {
+        "projects": [
+            {
+                "name": "caddy-fpk",
+                "path": "docker"
+            }
+        ]
+    },
+    "data-share": {
+        "shares": [
+            {
+                "name": "caddy-fpk",
+                "permission": {
+                    "rw": [
+                        "caddy-fpk"
+                    ]
+                }
+            }
+        ]
+    }
+}

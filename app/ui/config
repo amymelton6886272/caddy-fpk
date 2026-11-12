@@ -1,0 +1,13 @@
+{
+    ".url": {
+        "caddy.web": {
+            "title": "${entry.title}",
+            "icon": "images/icon_{0}.png",
+            "type": "url",
+            "protocol": "http",
+            "port": "${TRIM_SERVICE_PORT}",
+            "url": "/",
+            "allUsers": true
+        }
+    }
+}

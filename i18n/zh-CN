@@ -1,0 +1,26 @@
+[common]
+display_name="Caddy"
+desc="Caddy Web 服务器与配套管理后台。支持站点管理、自动 HTTPS、Caddyfile 编辑、证书和日志。本包不是 Caddy 官方发布的 fnOS 应用。"
+
+[install]
+stepTitle="设置 Web 服务端口"
+helpText="默认网站端口为 8080/8443，后台端口为 18081。后台密码仅用于首次安装，升级时会保留。自动申请公网证书需使用 80/443，并配置路由器转发及域名 DNS。请勿直接将后台暴露到公网。"
+httpPort="HTTP 端口"
+httpsPort="HTTPS 端口"
+panelPort="管理后台端口"
+adminPassword="后台管理员密码"
+portRequired="请输入端口号"
+portInvalid="请输入 1 到 65535 之间的端口号"
+passwordRequired="请设置后台管理员密码"
+passwordInvalid="密码长度须为 10 到 128 个字符"
+
+[uninstall]
+stepTitle="确认卸载"
+helpText="请选择如何处理 Caddy 配置、证书和网站文件。删除后无法恢复。"
+label="应用数据"
+keep="保留配置、证书和网站文件"
+delete="删除全部应用数据"
+required="请选择数据处理方式"
+
+[entry]
+title="Caddy 管理后台"

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -eu
+
+IMAGE_NAME="caddy-fpk-local:2.11.9-3"
+
+fail() {
+    echo "Caddy FPK: $1" >&2
+    if [ -n "${TRIM_TEMP_LOGFILE:-}" ]; then
+        echo "$1" >"${TRIM_TEMP_LOGFILE}"
+    fi
+    exit 1
+}
+
+docker build -f "${TRIM_APPDEST}/docker/Dockerfile" -t "$IMAGE_NAME" "${TRIM_APPDEST}" || fail "管理后台镜像构建失败。请检查 NAS 的网络连接和 Docker 服务。"
+
+exit 0
